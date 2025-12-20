@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+<section class="about-section">
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-info-circle"></i> About Our Platform</h1>
+            <p>Revolutionizing career matching with AI and Machine Learning</p>
+        </div>
+
+        <div class="about-content">
+            <div class="about-card">
+                <h2>Our Mission</h2>
+                <p>
+                    We're on a mission to transform the job search experience by leveraging cutting-edge 
+                    artificial intelligence and machine learning technologies. Our platform bridges the gap 
+                    between talented professionals and their dream careers.
+                </p>
+            </div>
+
+            <div class="tech-stack">
+                <h2>Technology Stack</h2>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <i class="fas fa-robot"></i>
+                        <h4>AI Providers</h4>
+                        <p>OpenAI GPT-4, Google Gemini, Anthropic Claude</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-brain"></i>
+                        <h4>Machine Learning</h4>
+                        <p>scikit-learn, TF-IDF, Random Forest, Gradient Boosting</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fab fa-python"></i>
+                        <h4>Backend</h4>
+                        <p>Python, Flask, pandas, NumPy</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-code"></i>
+                        <h4>Frontend</h4>
+                        <p>HTML5, CSS3, JavaScript, jQuery</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-detail">
+                <h2>How It Works</h2>
+                <div class="workflow">
+                    <div class="workflow-step">
+                        <div class="step-icon">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <h4>1. Upload Resume</h4>
+                        <p>Upload your resume in PDF, DOCX, or TXT format. Our system accepts files up to 10MB.</p>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h4>2. AI Parsing</h4>
+                        <p>Advanced NLP extracts personal information, skills, experience, education, and qualifications.</p>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h4>3. ML Processing</h4>
+                        <p>Machine learning models analyze your profile and predict the best job category for you.</p>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h4>4. Smart Matching</h4>
+                        <p>TF-IDF vectorization and cosine similarity match you with relevant job opportunities.</p>
+                    </div>
+                    <div class="workflow-step">
+                        <div class="step-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h4>5. Results & Insights</h4>
+                        <p>Receive ranked job matches with detailed analytics and downloadable reports.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <h2>Platform Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <i class="fas fa-briefcase"></i>
+                        <h3 id="jobCount">-</h3>
+                        <p>Job Listings</p>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-percentage"></i>
+                        <h3>95%</h3>
+                        <p>Match Accuracy</p>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-users"></i>
+                        <h3>10K+</h3>
+                        <p>Users Served</p>
+                    </div>
+                    <div class="stat-box">
+                        <i class="fas fa-clock"></i>
+                        <h3>&lt;30s</h3>
+                        <p>Average Analysis Time</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="team-section">
+                <h2>Contact Us</h2>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Email</h4>
+                            <p>support@resumeanalyzer.ai</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4>Phone</h4>
+                            <p>+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Location</h4>
+                            <p>Silicon Valley, CA</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Fetch and display system status
+$(document).ready(function() {
+    $.get('/api/system-status')
+        .done(function(data) {
+            if (data.total_jobs) {
+                $('#jobCount').text(data.total_jobs.toLocaleString());
+            }
+        })
+        .fail(function() {
+            $('#jobCount').text('5000+');
+        });
+});
+</script>
+{% endblock %}

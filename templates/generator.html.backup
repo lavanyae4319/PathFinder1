@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Generator{% endblock %}
+
+{% block content %}
+<section class="generator-section">
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-file-alt"></i> Resume Generator</h1>
+            <p>Create a professional, ATS-friendly resume in minutes</p>
+        </div>
+
+        <form id="generatorForm">
+            <!-- Personal Information -->
+            <div class="form-section">
+                <h3><i class="fas fa-user"></i> Personal Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="fullName">Full Name *</label>
+                        <input type="text" id="fullName" name="name" required placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required placeholder="john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone *</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" placeholder="New York, NY">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="linkedin">LinkedIn Profile</label>
+                        <input type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/johndoe">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Summary -->
+            <div class="form-section">
+                <h3><i class="fas fa-align-left"></i> Professional Summary</h3>
+                <div class="form-group">
+                    <label for="summary">Summary *</label>
+                    <textarea id="summary" name="summary" rows="4" required
+                        placeholder="Write a brief professional summary highlighting your key strengths and career goals..."></textarea>
+                    <span class="char-count"><span id="summaryCount">0</span> / 500 characters</span>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="form-section">
+                <h3><i class="fas fa-tools"></i> Skills</h3>
+                <div class="form-group">
+                    <label for="skillInput">Add Skills *</label>
+                    <div class="skill-input-container">
+                        <input type="text" id="skillInput"
+                            placeholder="e.g., Python, Project Management, Data Analysis">
+                        <button type="button" class="btn btn-secondary" id="addSkillBtn">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <div id="skillsContainer" class="tags-container"></div>
+                </div>
+            </div>
+
+            <!-- Work Experience -->
+            <div class="form-section">
+                <h3><i class="fas fa-briefcase"></i> Work Experience</h3>
+                <div id="experienceContainer"></div>
+                <button type="button" class="btn btn-outline" id="addExperienceBtn">
+                    <i class="fas fa-plus"></i> Add Experience
+                </button>
+            </div>
+
+            <!-- Education -->
+            <div class="form-section">
+                <h3><i class="fas fa-graduation-cap"></i> Education</h3>
+                <div id="educationContainer"></div>
+                <button type="button" class="btn btn-outline" id="addEducationBtn">
+                    <i class="fas fa-plus"></i> Add Education
+                </button>
+            </div>
+
+            <!-- Certifications (Optional) -->
+            <div class="form-section">
+                <h3><i class="fas fa-certificate"></i> Certifications (Optional)</h3>
+                <div class="form-group">
+                    <label for="certInput">Add Certification</label>
+                    <div class="skill-input-container">
+                        <input type="text" id="certInput" placeholder="e.g., AWS Certified Solutions Architect">
+                        <button type="button" class="btn btn-secondary" id="addCertBtn">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <div id="certificationsContainer" class="tags-container"></div>
+                </div>
+            </div>
+
+            <!-- Format Selection -->
+            <div class="form-section">
+                <h3><i class="fas fa-file-download"></i> Download Format</h3>
+                <div class="format-options">
+                    <label class="format-option">
+                        <input type="radio" name="format" value="docx" checked>
+                        <div class="format-card">
+                            <i class="fas fa-file-word"></i>
+                            <span>DOCX</span>
+                            <small>Microsoft Word</small>
+                        </div>
+                    </label>
+                    <label class="format-option">
+                        <input type="radio" name="format" value="pdf">
+                        <div class="format-card">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>PDF</span>
+                            <small>Portable Document</small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </form>
+
+        <!-- Submit Buttons -->
+        <div class="form-actions">
+            <button type="button" class="btn btn-outline" id="previewBtn">
+                <i class="fas fa-eye"></i> Preview
+            </button>
+            <button type="button" class="btn btn-primary btn-large" id="generateBtn">
+                <i class="fas fa-download"></i> Generate Resume
+            </button>
+        </div>
+
+        <!-- Preview Modal -->
+        <div id="previewModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-eye"></i> Resume Preview</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body" id="previewContent">
+                    <!-- Preview will be generated here -->
+                </div>
+                {% extends "base.html" %}
+
+                {% block title %}Resume Generator{% endblock %}
+
+                {% block content %}
+                <section class="generator-section">
+                    <div class="container">
+                        <div class="page-header">
+                            <h1><i class="fas fa-file-alt"></i> Resume Generator</h1>
+                            <p>Create a professional, ATS-friendly resume in minutes</p>
+                        </div>
+
+                        <form id="generatorForm">
+                            <!-- Personal Information -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-user"></i> Personal Information</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="fullName">Full Name *</label>
+                                        <input type="text" id="fullName" name="name" required placeholder="John Doe">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">Email *</label>
+                                        <input type="email" id="email" name="email" required
+                                            placeholder="john@example.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phone">Phone *</label>
+                                        <input type="tel" id="phone" name="phone" required
+                                            placeholder="+1 (555) 123-4567">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="location">Location</label>
+                                        <input type="text" id="location" name="location" placeholder="New York, NY">
+                                    </div>
+                                    <div class="form-group full-width">
+                                        <label for="linkedin">LinkedIn Profile</label>
+                                        <input type="url" id="linkedin" name="linkedin"
+                                            placeholder="https://linkedin.com/in/johndoe">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Professional Summary -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-align-left"></i> Professional Summary</h3>
+                                <div class="form-group">
+                                    <label for="summary">Summary *</label>
+                                    <textarea id="summary" name="summary" rows="4" required
+                                        placeholder="Write a brief professional summary highlighting your key strengths and career goals..."></textarea>
+                                    <span class="char-count"><span id="summaryCount">0</span> / 500 characters</span>
+                                </div>
+                            </div>
+
+                            <!-- Skills -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-tools"></i> Skills</h3>
+                                <div class="form-group">
+                                    <label for="skillInput">Add Skills *</label>
+                                    <div class="skill-input-container">
+                                        <input type="text" id="skillInput"
+                                            placeholder="e.g., Python, Project Management, Data Analysis">
+                                        <button type="button" class="btn btn-secondary" id="addSkillBtn">
+                                            <i class="fas fa-plus"></i> Add
+                                        </button>
+                                    </div>
+                                    <div id="skillsContainer" class="tags-container"></div>
+                                </div>
+                            </div>
+
+                            <!-- Work Experience -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-briefcase"></i> Work Experience</h3>
+                                <div id="experienceContainer"></div>
+                                <button type="button" class="btn btn-outline" id="addExperienceBtn">
+                                    <i class="fas fa-plus"></i> Add Experience
+                                </button>
+                            </div>
+
+                            <!-- Education -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-graduation-cap"></i> Education</h3>
+                                <div id="educationContainer"></div>
+                                <button type="button" class="btn btn-outline" id="addEducationBtn">
+                                    <i class="fas fa-plus"></i> Add Education
+                                </button>
+                            </div>
+
+                            <!-- Certifications (Optional) -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-certificate"></i> Certifications (Optional)</h3>
+                                <div class="form-group">
+                                    <label for="certInput">Add Certification</label>
+                                    <div class="skill-input-container">
+                                        <input type="text" id="certInput"
+                                            placeholder="e.g., AWS Certified Solutions Architect">
+                                        <button type="button" class="btn btn-secondary" id="addCertBtn">
+                                            <i class="fas fa-plus"></i> Add
+                                        </button>
+                                    </div>
+                                    <div id="certificationsContainer" class="tags-container"></div>
+                                </div>
+                            </div>
+
+                            <!-- Format Selection -->
+                            <div class="form-section">
+                                <h3><i class="fas fa-file-download"></i> Download Format</h3>
+                                <div class="format-options">
+                                    <label class="format-option">
+                                        <input type="radio" name="format" value="docx" checked>
+                                        <div class="format-card">
+                                            <i class="fas fa-file-word"></i>
+                                            <span>DOCX</span>
+                                            <small>Microsoft Word</small>
+                                        </div>
+                                    </label>
+                                    <label class="format-option">
+                                        <input type="radio" name="format" value="pdf">
+                                        <div class="format-card">
+                                            <i class="fas fa-file-pdf"></i>
+                                            <span>PDF</span>
+                                            <small>Portable Document</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Submit Buttons -->
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" id="previewBtn">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                            <button type="button" class="btn btn-primary btn-large" id="generateBtn">
+                                <i class="fas fa-download"></i> Generate Resume
+                            </button>
+                        </div>
+
+                        <!-- Preview Modal -->
+                        <div id="previewModal" class="modal">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3><i class="fas fa-eye"></i> Resume Preview</h3>
+                                    <button class="modal-close">&times;</button>
+                                </div>
+                                <div class="modal-body" id="previewContent">
+                                    <!-- Preview will be generated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                {% endblock %}
+
+                {% block extra_js %}
+                <script src="{{ url_for('static', filename='js/generator.js') }}"></script>
+                <script>
+                    // Debug script to verify buttons exist
+                    $(document).ready(function () {
+                        console.log('Debug: jQuery version', $.fn.jquery);
+                        console.log('Debug: Preview button exists?', $('#previewBtn').length);
+                        console.log('Debug: Generate button exists?', $('#generateBtn').length);
+
+                        // Backup handlers in case the main ones don't work
+                        setTimeout(function () {
+                            $('#previewBtn').off('click').on('click', function (e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('BACKUP: Preview clicked');
+                                alert('Preview button clicked! Check console for data.');
+                            });
+
+                            $('#generateBtn').off('click').on('click', function (e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                console.log('BACKUP: Generate clicked');
+                                alert('Generate button clicked! Check console for data.');
+                            });
+                        }, 1000);
+                    });
+                </script>
+                {% endblock %}

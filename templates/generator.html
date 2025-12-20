@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Generator{% endblock %}
+
+{% block content %}
+<section class="generator-section">
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-file-alt"></i> Resume Generator</h1>
+            <p>Create a professional, ATS-friendly resume in minutes</p>
+        </div>
+
+        <form id="generatorForm">
+            <!-- Personal Information -->
+            <div class="form-section">
+                <h3><i class="fas fa-user"></i> Personal Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="fullName">Full Name *</label>
+                        <input type="text" id="fullName" required placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" required placeholder="john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone *</label>
+                        <input type="tel" id="phone" required placeholder="555-1234">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" placeholder="New York, NY">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Summary -->
+            <div class="form-section">
+                <h3><i class="fas fa-align-left"></i> Professional Summary</h3>
+                <div class="form-group">
+                    <label for="summary">Summary *</label>
+                    <textarea id="summary" rows="4" required
+                        placeholder="Write a brief professional summary..."></textarea>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="form-section">
+                <h3><i class="fas fa-tools"></i> Skills</h3>
+                <div class="form-group">
+                    <label for="skillInput">Add Skills (comma-separated) *</label>
+                    <input type="text" id="skillInput" required placeholder="Python, JavaScript, React">
+                </div>
+            </div>
+
+            <!-- Work Experience -->
+            <div class="form-section">
+                <h3><i class="fas fa-briefcase"></i> Work Experience</h3>
+                <div class="form-group">
+                    <label>Job Title *</label>
+                    <input type="text" id="jobTitle" required placeholder="Software Engineer">
+                </div>
+                <div class="form-group">
+                    <label>Company *</label>
+                    <input type="text" id="company" required placeholder="Tech Corp">
+                </div>
+                <div class="form-group">
+                    <label>Duration *</label>
+                    <input type="text" id="duration" required placeholder="2020-Present">
+                </div>
+                <div class="form-group">
+                    <label>Responsibilities (one per line)</label>
+                    <textarea id="responsibilities" rows="3"
+                        placeholder="Led development team&#10;Implemented new features"></textarea>
+                </div>
+            </div>
+
+            <!-- Education -->
+            <div class="form-section">
+                <h3><i class="fas fa-graduation-cap"></i> Education</h3>
+                <div class="form-group">
+                    <label>Degree *</label>
+                    <input type="text" id="degree" required placeholder="Bachelor of Science">
+                </div>
+                <div class="form-group">
+                    <label>Field *</label>
+                    <input type="text" id="field" required placeholder="Computer Science">
+                </div>
+                <div class="form-group">
+                    <label>Institution *</label>
+                    <input type="text" id="institution" required placeholder="MIT">
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="text" id="year" placeholder="2020">
+                </div>
+            </div>
+
+            <!-- Format Selection -->
+            <div class="form-section">
+                <h3><i class="fas fa-file-download"></i> Download Format</h3>
+                <div class="format-options">
+                    <label class="format-option">
+                        <input type="radio" name="format" value="docx" checked>
+                        <div class="format-card">
+                            <i class="fas fa-file-word"></i>
+                            <span>DOCX</span>
+                        </div>
+                    </label>
+                    <label class="format-option">
+                        <input type="radio" name="format" value="pdf">
+                        <div class="format-card">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>PDF</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </form>
+
+        <!-- Submit Buttons -->
+        <div class="form-actions" style="margin-top: 2rem; text-align: center;">
+            <button type="button" class="btn btn-primary btn-large" id="generateBtn" onclick="generateResume()">
+                <i class="fas fa-download"></i> Generate Resume
+            </button>
+        </div>
+    </div>
+</section>
+
+<script>
+    function generateResume() {
+        console.log('Generate button clicked!');
+
+        // Collect form data
+        const data = {
+            personal_info: {
+                name: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                location: document.getElementById('location').value || '',
+                linkedin: ''
+            },
+            summary: document.getElementById('summary').value,
+            skills: document.getElementById('skillInput').value.split(',').map(s => s.trim()),
+            experience: [{
+                title: document.getElementById('jobTitle').value,
+                company: document.getElementById('company').value,
+                duration: document.getElementById('duration').value,
+                responsibilities: document.getElementById('responsibilities').value.split('\n').filter(r => r.trim())
+            }],
+            education: [{
+                degree: document.getElementById('degree').value,
+                field: document.getElementById('field').value,
+                institution: document.getElementById('institution').value,
+                year: document.getElementById('year').value || '',
+                gpa: ''
+            }],
+            certifications: [],
+            format: document.querySelector('input[name="format"]:checked').value
+        };
+
+        console.log('Data:', data);
+
+        // Validate
+        if (!data.personal_info.name || !data.personal_info.email || !data.personal_info.phone) {
+            alert('Please fill in all required personal information fields');
+            return;
+        }
+
+        if (!data.summary) {
+            alert('Please fill in the professional summary');
+            return;
+        }
+
+        if (data.skills.length === 0 || !data.skills[0]) {
+            alert('Please add at least one skill');
+            return;
+        }
+
+        // Show loading
+        const btn = document.getElementById('generateBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        btn.disabled = true;
+
+        // Submit to API
+        fetch('/api/generate-resume', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to generate resume');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'resume_' + data.personal_info.name.replace(/\s+/g, '_') + '.' + data.format;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                alert('Resume generated successfully!');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to generate resume: ' + error.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    }
+</script>
+{% endblock %}

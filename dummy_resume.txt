@@ -1,0 +1,23 @@
+John Doe
+Software Engineer
+Email: john.doe@example.com
+Phone: (555) 123-4567
+
+Summary:
+Experienced Software Engineer with a strong background in Python and Web Development.
+
+Skills:
+- Python, Flask, Django
+- JavaScript, React, HTML, CSS
+- SQL, PostgreSQL
+- Machine Learning, Scikit-learn
+
+Experience:
+Software Developer at Tech Corp (2020 - Present)
+- Developed and maintained web applications using Flask and React.
+- Implemented RESTful APIs and integrated with third-party services.
+- Optimized database queries for better performance.
+
+Education:
+Bachelor of Science in Computer Science
+University of Technology (2016 - 2020)

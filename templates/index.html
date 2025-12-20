@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    Your Career Success <br>
+                    <span class="gradient-text">Powered by PathFinder</span>
+                </h1>
+                <p class="hero-description">
+                    Analyze your resume with cutting-edge AI, get matched with perfect job opportunities, 
+                    and generate professional resumes—all in one intelligent platform.
+                </p>
+                <div class="hero-buttons">
+                    <a href="{{ url_for('analyze_page') }}" class="btn btn-primary btn-large">
+                        <i class="fas fa-search"></i> Analyze Resume
+                    </a>
+                    <a href="{{ url_for('job_matcher_page') }}" class="btn btn-accent btn-large">
+                        <i class="fas fa-bullseye"></i> Job Predictor
+                    </a>
+                    <a href="{{ url_for('generator_page') }}" class="btn btn-secondary btn-large">
+                        <i class="fas fa-file-alt"></i> Generate Resume
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number" data-target="10000">0</span>+
+                        <span class="stat-label">Resumes Analyzed</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" data-target="95">0</span>%
+                        <span class="stat-label">Match Accuracy</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" data-target="5000">0</span>+
+                        <span class="stat-label">Job Opportunities</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="floating-card card-1">
+                    <i class="fas fa-brain"></i>
+                    <span>AI Analysis</span>
+                </div>
+                <div class="floating-card card-2">
+                    <i class="fas fa-chart-line"></i>
+                    <span>95% Accuracy</span>
+                </div>
+                <div class="floating-card card-3">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Job Matching</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <div class="container">
+        <div class="section-header">
+            <h2>Powerful Features</h2>
+            <p>Everything you need to land your dream job</p>
+        </div>
+        <div class="features-grid">
+            <a href="{{ url_for('analyze_page') }}" style="text-decoration: none; color: inherit;">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI-Powered Analysis</h3>
+                    <p>Advanced natural language processing to extract and understand your resume content</p>
+                </div>
+            </a>
+            <a href="{{ url_for('job_matcher_page') }}" style="text-decoration: none; color: inherit;">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <h3>Smart Job Matching</h3>
+                    <p>Machine learning algorithms match you with the most suitable job opportunities</p>
+                </div>
+            </a>
+            <a href="{{ url_for('generator_page') }}" style="text-decoration: none; color: inherit;">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h3>Resume Generator</h3>
+                    <p>Create professional, ATS-friendly resumes in PDF or DOCX format</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="section-header">
+            <h2>How It Works</h2>
+            <p>Get matched with your dream job in three simple steps</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Upload Resume</h3>
+                    <p>Upload your resume in PDF, DOCX, or TXT format</p>
+                </div>
+            </div>
+            <div class="step-arrow">
+                <i class="fas fa-arrow-right"></i>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>AI Analysis</h3>
+                    <p>Our AI extracts skills, experience, and qualifications</p>
+                </div>
+            </div>
+            <div class="step-arrow">
+                <i class="fas fa-arrow-right"></i>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Get Matches</h3>
+                    <p>Receive personalized job recommendations with match scores</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to Find Your Perfect Job?</h2>
+            <p>Join thousands of professionals who found their dream careers with our AI-powered platform</p>
+            <a href="{{ url_for('analyze_page') }}" class="btn btn-primary btn-large">
+                Get Started Now <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animate statistics counter
+function animateCounter(element, target) {
+    let current = 0;
+    const increment = target / 50;
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+            element.textContent = target.toLocaleString();
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current).toLocaleString();
+        }
+    }, 30);
+}
+
+// Intersection Observer for counter animation
+const observerOptions = {
+    threshold: 0.5
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach(num => {
+                const target = parseInt(num.getAttribute('data-target'));
+                animateCounter(num, target);
+            });
+            observer.disconnect();
+        }
+    });
+}, observerOptions);
+
+const statsSection = document.querySelector('.hero-stats');
+if (statsSection) {
+    observer.observe(statsSection);
+}
+</script>
+{% endblock %}

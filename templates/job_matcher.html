@@ -1,0 +1,987 @@
+{% extends "base.html" %}
+
+{% block title %}Job Matcher{% endblock %}
+
+<!-- CACHE BUSTER v3.0 - 2025-12-20 12:42 - TRAINED MODEL ACTIVE -->
+{% block content %}
+<section class="job-matcher-section">
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-bullseye"></i> PathFinder Job Matcher</h1>
+            <p>Upload your resume and let our trained ML model find the perfect job matches</p>
+        </div>
+
+        <!-- Upload Form -->
+        <div class="upload-container" id="uploadSection">
+            <div class="info-banner">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>Powered by Machine Learning</strong>
+                    <p>Using Gradient Boosting Classifier with 99.66% accuracy trained on 21,865 job listings</p>
+                </div>
+            </div>
+
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-box" id="uploadBox">
+                    <input type="file" id="resumeFile" name="resume" accept=".pdf,.docx,.txt" hidden>
+                    <div class="upload-inner">
+                        <div class="upload-icon-wrapper">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <div class="upload-pulse"></div>
+                        </div>
+                        <h3>Drag & Drop your resume here</h3>
+                        <p>or click to browse</p>
+                        <span class="file-info">Supported formats: PDF, DOCX, TXT (Max 10MB)</span>
+                        <div class="selected-file" id="selectedFile" style="display: none;">
+                            <i class="fas fa-file-alt"></i>
+                            <div class="file-meta">
+                                <span id="fileName"></span>
+                                <span id="fileHint">File ready. Click "Find Job Matches"</span>
+                            </div>
+                            <button type="button" id="removeFile" class="btn-remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="upload-options">
+                    <label for="topK">Number of job matches to show:</label>
+                    <select id="topK" name="top_k">
+                        <option value="5">Top 5 Matches</option>
+                        <option value="10" selected>Top 10 Matches</option>
+                        <option value="15">Top 15 Matches</option>
+                        <option value="20">Top 20 Matches</option>
+                        <option value="30">Top 30 Matches</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-accent btn-large" id="matchBtn" disabled>
+                    <i class="fas fa-bullseye"></i> Find Job Matches
+                </button>
+            </form>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-container" id="loadingSection" style="display: none;">
+            <div class="loader"></div>
+            <h3>Finding your perfect job matches...</h3>
+            <p>ML model is analyzing your skills and matching with 21,865 job opportunities</p>
+            <div class="progress-steps">
+                <div class="progress-step active">
+                    <i class="fas fa-upload"></i>
+                    <span>Uploading</span>
+                </div>
+                <div class="progress-step" id="parsingStep">
+                    <i class="fas fa-brain"></i>
+                    <span>Extracting Skills</span>
+                </div>
+                <div class="progress-step" id="matchingStep">
+                    <i class="fas fa-robot"></i>
+                    <span>ML Matching</span>
+                </div>
+                <div class="progress-step" id="resultsStep">
+                    <i class="fas fa-check"></i>
+                    <span>Complete</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-container" id="resultsSection" style="display: none;">
+            <div class="results-header">
+                <h2><i class="fas fa-briefcase"></i> Job Match Results</h2>
+                <button class="btn btn-secondary" id="newMatchBtn">
+                    <i class="fas fa-plus"></i> New Search
+                </button>
+            </div>
+
+            <!-- ML Prediction Card -->
+            <div class="prediction-card">
+                <div class="prediction-header">
+                    <h3><i class="fas fa-robot"></i> ML Model Prediction</h3>
+                    <div class="confidence-badge" id="confidenceBadge">
+                        <span id="confidenceScore">0</span>% Confidence
+                    </div>
+                </div>
+                <div class="prediction-body">
+                    <div class="prediction-item">
+                        <label>Predicted Job Category:</label>
+                        <span class="category-tag" id="predictedCategory">-</span>
+                    </div>
+                    <div class="prediction-stats">
+                        <div class="stat-box">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong id="totalMatches">0</strong>
+                                <span>Total Matches Found</span>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <i class="fas fa-star"></i>
+                            <div>
+                                <strong id="avgMatchScore">0</strong>
+                                <span>Avg Match Score</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Candidate Summary -->
+            <div class="summary-card">
+                <h3><i class="fas fa-user"></i> Your Profile</h3>
+                <div class="profile-grid">
+                    <div class="profile-item">
+                        <label>Name:</label>
+                        <span id="candidateName">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <label>Experience:</label>
+                        <span id="candidateExperience">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <label>Email:</label>
+                        <span id="candidateEmail">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <label>Phone:</label>
+                        <span id="candidatePhone">-</span>
+                    </div>
+                </div>
+
+                <div class="skills-section">
+                    <h4><i class="fas fa-tools"></i> Detected Skills</h4>
+                    <div class="skills-list" id="skillsList"></div>
+                </div>
+            </div>
+
+            <!-- Job Matches -->
+            <div class="jobs-section">
+                <h3><i class="fas fa-briefcase"></i> Matching Jobs</h3>
+                <div id="jobsList" class="jobs-grid"></div>
+            </div>
+
+            <!-- Top Companies -->
+            <div class="insights-section">
+                <div class="insight-card">
+                    <h4><i class="fas fa-building"></i> Top Hiring Companies</h4>
+                    <div id="topCompaniesList"></div>
+                </div>
+                <div class="insight-card">
+                    <h4><i class="fas fa-map-marker-alt"></i> Top Job Locations</h4>
+                    <div id="topLocationsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .job-matcher-section {
+        padding: 3rem 0;
+        min-height: calc(100vh - 200px);
+    }
+
+    .upload-box {
+        position: relative;
+        border-radius: 16px;
+        border: 2px dashed rgba(148, 163, 184, 0.5);
+        background: rgba(15, 23, 42, 0.7);
+        padding: 3rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .upload-box:hover {
+        border-color: var(--secondary-color);
+        box-shadow: 0 15px 40px rgba(8, 145, 178, 0.25);
+    }
+
+    .upload-box.file-selected {
+        border-style: solid;
+        border-color: var(--secondary-color);
+        background: radial-gradient(circle at top, rgba(56, 189, 248, 0.18), rgba(15, 23, 42, 0.95));
+    }
+
+    .upload-inner {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .upload-icon-wrapper {
+        position: relative;
+        width: 72px;
+        height: 72px;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-icon {
+        font-size: 2.5rem;
+        color: var(--secondary-color);
+        position: relative;
+        z-index: 2;
+    }
+
+    .upload-pulse {
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
+        animation: pulseGlow 2s infinite;
+        z-index: 1;
+    }
+
+    .upload-box h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .upload-box p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .upload-box .file-info {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .selected-file {
+        margin-top: 1.25rem;
+        padding: 0.9rem 1.2rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.7);
+    }
+
+    .selected-file i {
+        color: var(--secondary-color);
+        font-size: 1.2rem;
+    }
+
+    .file-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.15rem;
+    }
+
+    #fileName {
+        font-weight: 600;
+    }
+
+    #fileHint {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .btn-remove {
+        border: none;
+        background: transparent;
+        color: var(--danger-color);
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 0.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-remove:hover {
+        transform: scale(1.05);
+    }
+
+    .info-banner {
+        background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(8, 145, 178, 0.1) 100%);
+        border: 1px solid rgba(6, 182, 212, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .info-banner i {
+        font-size: 2rem;
+        color: var(--secondary-color);
+        flex-shrink: 0;
+    }
+
+    .info-banner strong {
+        color: var(--secondary-color);
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 0.3rem;
+    }
+
+    .info-banner p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .prediction-card {
+        background: var(--dark-card);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .prediction-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .prediction-header h3 {
+        color: var(--primary-color);
+        margin: 0;
+    }
+
+    .confidence-badge {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .prediction-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .prediction-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .prediction-item label {
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .category-tag {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, #0891B2 100%);
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .prediction-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-box {
+        background: rgba(79, 70, 229, 0.1);
+        border: 1px solid rgba(79, 70, 229, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .stat-box:hover {
+        background: rgba(79, 70, 229, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .stat-box i {
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+
+    .stat-box strong {
+        display: block;
+        font-size: 1.8rem;
+        color: var(--text-primary);
+        margin-bottom: 0.2rem;
+        font-weight: 700;
+    }
+
+    .stat-box span {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .insights-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .insight-card {
+        background: var(--dark-card);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .insight-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .insight-card h4 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    #topCompaniesList,
+    #topLocationsList {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .company-item,
+    .location-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem;
+        background: rgba(79, 70, 229, 0.1);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(79, 70, 229, 0.2);
+    }
+
+    .company-item:hover,
+    .location-item:hover {
+        background: rgba(79, 70, 229, 0.15);
+        transform: translateX(5px);
+        border-color: var(--primary-color);
+    }
+
+    .company-item strong,
+    .location-item strong {
+        color: var(--text-primary);
+    }
+
+    .count-badge {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Summary Card Styling */
+    .summary-card {
+        background: var(--dark-card);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-md);
+    }
+
+    .summary-card h3 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.3rem;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .profile-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .profile-item label {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .profile-item span {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .skills-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .skills-section h4 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .skills-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .skill-tag {
+        background: rgba(6, 182, 212, 0.2);
+        color: var(--secondary-color);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: 1px solid rgba(6, 182, 212, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .skill-tag:hover {
+        background: rgba(6, 182, 212, 0.3);
+        transform: translateY(-2px);
+    }
+
+    /* Jobs Section Styling */
+    .jobs-section {
+        margin-bottom: 2rem;
+    }
+
+    .jobs-section h3 {
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .jobs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .job-card {
+        background: var(--dark-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .job-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
+        box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
+    }
+
+    .job-card .job-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .job-card .job-header h4 {
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+        flex: 1;
+        line-height: 1.4;
+    }
+
+    .job-card .match-score {
+        background: linear-gradient(135deg, var(--accent) 0%, #0891B2 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .job-card .job-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .job-card .job-details span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .job-card .job-details i {
+        color: var(--secondary-color);
+    }
+
+    .job-card p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .job-card .job-footer {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .job-card .job-footer i {
+        color: var(--secondary-color);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .jobs-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .prediction-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .insights-section {
+            grid-template-columns: 1fr;
+        }
+
+        .job-card .job-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .job-card .match-score {
+            align-self: flex-start;
+        }
+    }
+</style>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const uploadBox = document.getElementById('uploadBox');
+        const resumeFile = document.getElementById('resumeFile');
+        const uploadForm = document.getElementById('uploadForm');
+        const selectedFileDiv = document.getElementById('selectedFile');
+        const fileNameSpan = document.getElementById('fileName');
+        const removeFileBtn = document.getElementById('removeFile');
+
+        console.log('Job Matcher Page Initialized');
+
+        // Make upload box clickable
+        uploadBox.style.cursor = 'pointer';
+        uploadBox.addEventListener('click', function (e) {
+            if (e.target.id !== 'removeFile' && !e.target.closest('#removeFile')) {
+                console.log('Opening file dialog...');
+                resumeFile.click();
+            }
+        });
+
+        // File selection handler
+        resumeFile.addEventListener('change', function (e) {
+            console.log('File selected:', this.files.length);
+            if (this.files.length > 0) {
+                showSelectedFile(this.files[0].name);
+            }
+        });
+
+        // Remove file button
+        if (removeFileBtn) {
+            removeFileBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                resumeFile.value = '';
+                selectedFileDiv.style.display = 'none';
+                uploadBox.classList.remove('file-selected');
+                uploadBox.style.opacity = '1';
+                document.getElementById('matchBtn').disabled = false;
+            });
+        }
+
+        function showSelectedFile(filename) {
+            console.log('Showing selected file:', filename);
+            fileNameSpan.textContent = filename;
+            selectedFileDiv.style.display = 'flex';
+            uploadBox.classList.add('file-selected');
+            const matchBtn = document.getElementById('matchBtn');
+            matchBtn.disabled = false;
+            console.log('Button enabled. Disabled state:', matchBtn.disabled);
+        }
+
+        uploadBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadBox.style.borderColor = 'var(--primary)';
+            uploadBox.style.background = 'rgba(99, 102, 241, 0.05)';
+        });
+
+        uploadBox.addEventListener('dragleave', () => {
+            uploadBox.style.borderColor = '';
+            uploadBox.style.background = '';
+        });
+
+        uploadBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadBox.style.borderColor = '';
+            uploadBox.style.background = '';
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                resumeFile.files = files;
+                showSelectedFile(files[0].name);
+            }
+        });
+
+        // Drag and drop listeners (kept for compatibility)
+
+        // Form submission
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('Form submitted!');
+            console.log('File:', resumeFile.files[0]);
+
+            if (!resumeFile.files[0]) {
+                alert('Please select a resume file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('resume', resumeFile.files[0]);
+            formData.append('top_k', document.getElementById('topK').value);
+
+            console.log('Showing loading state...');
+            showLoadingState();
+
+            try {
+                console.log('Sending request to /api/job-match...');
+                const response = await fetch('/api/job-match', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('Response received:', response.status);
+                const data = await response.json();
+                console.log('Data:', data);
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                    resetToUpload();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to analyze resume. Error: ' + error.message);
+                resetToUpload();
+            }
+        });
+
+        function showLoadingState() {
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('loadingSection').style.display = 'flex';
+
+            setTimeout(() => {
+                document.getElementById('parsingStep').classList.add('active');
+            }, 1000);
+
+            setTimeout(() => {
+                document.getElementById('matchingStep').classList.add('active');
+            }, 2000);
+
+            setTimeout(() => {
+                document.getElementById('resultsStep').classList.add('active');
+            }, 3000);
+        }
+
+        function displayResults(data) {
+            console.log('Display Results Data:', data);
+            document.getElementById('loadingSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+
+            // Smooth scroll to results
+            setTimeout(() => {
+                document.getElementById('resultsSection').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 100);
+
+            // ML Prediction
+            document.getElementById('predictedCategory').textContent = data.predictions?.predicted_category || 'N/A';
+            document.getElementById('confidenceScore').textContent = data.predictions?.confidence || 0;
+            document.getElementById('totalMatches').textContent = data.predictions?.total_matches || 0;
+            document.getElementById('avgMatchScore').textContent = (data.predictions?.avg_match_score || 0).toFixed(2);
+
+            // Candidate info
+            document.getElementById('candidateName').textContent = data.parsed_data?.name || 'Not found';
+            document.getElementById('candidateExperience').textContent =
+                data.parsed_data?.experience_years || '0 years';
+            document.getElementById('candidateEmail').textContent =
+                data.parsed_data?.email || 'Not found';
+            document.getElementById('candidatePhone').textContent =
+                data.parsed_data?.phone || 'N/A';
+
+            // Skills
+            const skillsList = document.getElementById('skillsList');
+            if (data.parsed_data?.skills && data.parsed_data.skills.length > 0) {
+                skillsList.innerHTML = data.parsed_data.skills.map(skill =>
+                    `<span class="skill-tag">${skill}</span>`
+                ).join('');
+            } else {
+                skillsList.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem;">No skills detected</p>';
+            }
+
+            // Job matches - UPDATED v2.0 - Using correct field names from trained model
+            const jobsList = document.getElementById('jobsList');
+            console.log('Matching jobs data:', data.matching_jobs);
+            console.log('Number of jobs:', data.matching_jobs?.length);
+            if (data.matching_jobs && data.matching_jobs.length > 0) {
+                console.log('First job sample:', data.matching_jobs[0]);
+                jobsList.innerHTML = data.matching_jobs.map(job => {
+                    const matchPercent = Math.round(job.match_percentage || 0);
+
+                    // Clean up job description
+                    let jobDesc = job.jobdescription || '';
+                    // Remove common unwanted phrases
+                    jobDesc = jobDesc
+                        .replace(/Job Description Send me Jobs like this/gi, '')
+                        .replace(/Send me Jobs like this/gi, '')
+                        .replace(/Skills -/gi, 'Skills:')
+                        .replace(/Education -/gi, 'Education:')
+                        .replace(/Job Description:/gi, '')
+                        .replace(/Salary: Not Disclosed by Recruiter/gi, '')
+                        .replace(/Industry:.*?Role:/gi, '')
+                        .replace(/Keyskills.*?Desired Candidate Profile/gi, '')
+                        .replace(/Company Profile:.*$/gi, '')
+                        .replace(/Download PPT.*$/gi, '')
+                        .replace(/View Contact Details.*$/gi, '')
+                        .trim();
+
+                    const truncatedDesc = jobDesc.length > 300 ? jobDesc.substring(0, 300) + '...' : jobDesc;
+
+
+                    return `
+                    <div class="job-card">
+                        <div class="job-header">
+                            <h4>${job.jobtitle || 'Position'}</h4>
+                            <div class="match-score">
+                                ${matchPercent}% Match
+                            </div>
+                        </div>
+                        <div class="job-details">
+                            <span><i class="fas fa-building"></i> ${job.company || 'Company'}</span>
+                            <span><i class="fas fa-map-marker-alt"></i> ${job.primary_location || 'Location'}</span>
+                            <span><i class="fas fa-tag"></i> ${job.job_category || 'Category'}</span>
+                        </div>
+                        ${truncatedDesc ? `<p>${truncatedDesc}</p>` : ''}
+                        <div class="job-footer">
+                            <span class="experience-req"><i class="fas fa-briefcase"></i> ${job.experience || 'Experience not specified'}</span>
+                        </div>
+                    </div>
+                `;
+                }).join('');
+            } else {
+                jobsList.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 3rem; background: var(--dark-card); border-radius: 16px; border: 1px solid var(--border-color);"><i class="fas fa-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: var(--secondary-color);"></i><p>No matching jobs found. Try adjusting your resume or search criteria.</p></div>';
+            }
+
+            // Top companies
+            if (data.top_companies) {
+                const companiesList = document.getElementById('topCompaniesList');
+                companiesList.innerHTML = Object.entries(data.top_companies).map(([company, count]) => `
+                <div class="company-item">
+                    <strong>${company}</strong>
+                    <span class="count-badge">${count} jobs</span>
+                </div>
+            `).join('');
+            }
+
+            // Top locations
+            if (data.top_locations) {
+                const locationsList = document.getElementById('topLocationsList');
+                locationsList.innerHTML = Object.entries(data.top_locations).map(([location, count]) => `
+                <div class="location-item">
+                    <strong>${location}</strong>
+                    <span class="count-badge">${count} jobs</span>
+                </div>
+            `).join('');
+            }
+        }
+
+        function resetToUpload() {
+            document.getElementById('loadingSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'block';
+            uploadForm.reset();
+            resumeFile.value = '';
+            selectedFileDiv.style.display = 'none';
+            uploadBox.querySelector('i').style.display = 'block';
+            uploadBox.querySelector('h3').style.display = 'block';
+            uploadBox.querySelector('p').style.display = 'block';
+            uploadBox.querySelector('.file-info').style.display = 'block';
+        }
+
+        document.getElementById('newMatchBtn').addEventListener('click', resetToUpload);
+    });
+</script>
+
+
+{% endblock %}

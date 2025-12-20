@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Test Form Submit</title>
+</head>
+
+<body>
+    <h1>Test Form Submission</h1>
+
+    <form id="testForm">
+        <input type="file" id="testFile" accept=".txt">
+        <button type="submit" id="testBtn">Submit</button>
+    </form>
+
+    <div id="output"></div>
+
+    <script>
+        const form = document.getElementById('testForm');
+        const fileInput = document.getElementById('testFile');
+        const output = document.getElementById('output');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('Form submitted!');
+            output.innerHTML = '<p>Form submitted! File: ' + (fileInput.files[0] ? fileInput.files[0].name : 'none') + '</p>';
+
+            if (fileInput.files[0]) {
+                const formData = new FormData();
+                formData.append('resume', fileInput.files[0]);
+                formData.append('top_k', 10);
+
+                try {
+                    const response = await fetch('/api/job-match', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    output.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } catch (error) {
+                    output.innerHTML += '<p>Error: ' + error.message + '</p>';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

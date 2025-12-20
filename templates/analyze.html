@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze Resume{% endblock %}
+
+{% block content %}
+<section class="analyze-section">
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-search"></i> Resume Analysis</h1>
+            <p>Upload your resume and discover matching job opportunities</p>
+        </div>
+
+        <!-- Upload Form -->
+        <div class="upload-container" id="uploadSection">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-box" id="uploadBox">
+                    <input type="file" id="resumeFile" name="resume" accept=".pdf,.docx,.txt" hidden>
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Drag & Drop your resume here</h3>
+                    <p>or click to browse</p>
+                    <span class="file-info">Supported formats: PDF, DOCX, TXT (Max 10MB)</span>
+                    <div class="selected-file" id="selectedFile" style="display: none;">
+                        <i class="fas fa-file-alt"></i>
+                        <span id="fileName"></span>
+                        <button type="button" id="removeFile" class="btn-remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="upload-options">
+                    <label for="topK">Number of job matches:</label>
+                    <select id="topK" name="top_k">
+                        <option value="5">Top 5 Matches</option>
+                        <option value="10" selected>Top 10 Matches</option>
+                        <option value="15">Top 15 Matches</option>
+                        <option value="20">Top 20 Matches</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large" id="analyzeBtn">
+                    <i class="fas fa-magic"></i> Analyze Resume
+                </button>
+            </form>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-container" id="loadingSection" style="display: none;">
+            <div class="loader"></div>
+            <h3>Analyzing your resume...</h3>
+            <p>Our AI is extracting skills, experience, and finding perfect job matches</p>
+            <div class="progress-steps">
+                <div class="progress-step active">
+                    <i class="fas fa-upload"></i>
+                    <span>Uploading</span>
+                </div>
+                <div class="progress-step" id="parsingStep">
+                    <i class="fas fa-brain"></i>
+                    <span>AI Parsing</span>
+                </div>
+                <div class="progress-step" id="matchingStep">
+                    <i class="fas fa-search"></i>
+                    <span>Job Matching</span>
+                </div>
+                <div class="progress-step" id="resultsStep">
+                    <i class="fas fa-check"></i>
+                    <span>Complete</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-container" id="resultsSection" style="display: none;">
+            <div class="results-header">
+                <h2><i class="fas fa-chart-line"></i> Analysis Results</h2>
+                <button class="btn btn-secondary" id="newAnalysisBtn">
+                    <i class="fas fa-plus"></i> New Analysis
+                </button>
+            </div>
+
+            <!-- Candidate Summary -->
+            <div class="summary-card">
+                <h3><i class="fas fa-user"></i> Candidate Profile</h3>
+                <div class="profile-grid">
+                    <div class="profile-item">
+                        <label>Name:</label>
+                        <span id="candidateName">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <label>Email:</label>
+                        <span id="candidateEmail">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <label>Phone:</label>
+                        <span id="candidatePhone">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <label>Location:</label>
+                        <span id="candidateLocation">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <label>Experience:</label>
+                        <span id="candidateExperience">-</span>
+                    </div>
+                    <div class="profile-item">
+                        <label>Predicted Category:</label>
+                        <span id="predictedCategory" class="badge">-</span>
+                    </div>
+                </div>
+                <div class="summary-text">
+                    <label>Professional Summary:</label>
+                    <p id="candidateSummary">-</p>
+                </div>
+            </div>
+
+            <!-- Skills & Education -->
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3><i class="fas fa-tools"></i> Skills</h3>
+                    <div id="skillsList" class="tags-container"></div>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-graduation-cap"></i> Education</h3>
+                    <div id="educationList"></div>
+                </div>
+            </div>
+
+            <!-- AI Analysis Score -->
+            <div class="ai-analysis-card" id="aiAnalysisCard" style="display: none;">
+                <div class="score-header">
+                    <h3><i class="fas fa-robot"></i> AI Resume Analysis Score</h3>
+                    <div class="score-badge" id="overallScore">-</div>
+                </div>
+                <p class="analysis-summary" id="analysisSummary"></p>
+            </div>
+
+            <!-- Strengths & Weaknesses -->
+            <div class="analysis-grid" id="strengthsWeaknesses" style="display: none;">
+                <div class="analysis-card strengths-card">
+                    <h3><i class="fas fa-check-circle"></i> Strengths</h3>
+                    <ul id="strengthsList"></ul>
+                </div>
+                <div class="analysis-card weaknesses-card">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Areas for Improvement</h3>
+                    <ul id="weaknessesList"></ul>
+                </div>
+            </div>
+
+            <!-- Suggestions -->
+            <div class="suggestions-card" id="suggestionsCard" style="display: none;">
+                <h3><i class="fas fa-lightbulb"></i> Improvement Suggestions</h3>
+                <ul id="suggestionsList"></ul>
+            </div>
+
+            <!-- AI Job Recommendations -->
+            <div class="ai-jobs-card" id="aiJobsCard" style="display: none;">
+                <h3><i class="fas fa-briefcase"></i> Recommended Job Opportunities</h3>
+                <div id="aiJobRecommendations"></div>
+            </div>
+
+            <!-- Skills Gap Analysis -->
+            <div class="skills-gap-card" id="skillsGapCard" style="display: none;">
+                <h3><i class="fas fa-chart-line"></i> Skills Gap Analysis</h3>
+                <div id="skillsGapList"></div>
+            </div>
+
+            <!-- Career Path Suggestions -->
+            <div class="career-path-card" id="careerPathCard" style="display: none;">
+                <h3><i class="fas fa-route"></i> Career Path Suggestions</h3>
+                <div id="careerPathList"></div>
+            </div>
+
+            <!-- ATS Optimization -->
+            <div class="ats-card" id="atsCard" style="display: none;">
+                <h3><i class="fas fa-search"></i> ATS Optimization Tips</h3>
+                <ul id="atsTipsList"></ul>
+                <div class="keywords-section">
+                    <h4>Keywords to Add:</h4>
+                    <div id="keywordsList" class="tags-container"></div>
+                </div>
+            </div>
+
+            <!-- Prediction Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-bullseye"></i>
+                    <div class="stat-content">
+                        <h4 id="categoryConfidence">-</h4>
+                        <p>Category Confidence</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-briefcase"></i>
+                    <div class="stat-content">
+                        <h4 id="totalMatches">-</h4>
+                        <p>Total Matches Found</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-star"></i>
+                    <div class="stat-content">
+                        <h4 id="avgMatchScore">-</h4>
+                        <p>Average Match Score</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Matches -->
+            <div class="matches-section">
+                <h3><i class="fas fa-fire"></i> Top Job Matches</h3>
+                <div id="jobMatches" class="jobs-grid"></div>
+            </div>
+
+            <!-- Top Companies & Locations -->
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <h4><i class="fas fa-building"></i> Top Hiring Companies</h4>
+                    <div id="topCompanies"></div>
+                </div>
+                <div class="insight-card">
+                    <h4><i class="fas fa-map-marker-alt"></i> Top Locations</h4>
+                    <div id="topLocations"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/analyze.js') }}"></script>
+{% endblock %}
