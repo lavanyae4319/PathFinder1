@@ -1,7 +1,4 @@
-"""
-Gemini AI Resume Analyzer - Comprehensive Resume Analysis using Gemini 2.5 Flash
-Provides detailed insights, suggestions, and job recommendations
-"""
+
 
 import os
 import json
