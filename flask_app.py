@@ -1,7 +1,3 @@
-"""
-Flask Web Application - Intelligent Resume Analyzer & Job Match Prediction System
-Features: Resume Analysis, Job Prediction, Resume Generator
-"""
 
 from flask import Flask, render_template, request, jsonify, send_file, flash, redirect, url_for, session
 from werkzeug.utils import secure_filename
